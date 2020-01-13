@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  consul-kv-backup-lambda
+
+  SAM Template for consul-kv-backup-lambda
+
+Globals:
+  Function:
+    Timeout: 3
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues:
+      - staging
+      - production
+    Description: Environment
+  PrivateSubnet1:
+    Type: String
+    Description: PrivateSubnet1
+  PrivateSubnet2:
+    Type: String
+    Description: PrivateSubnet2
+  VpcId:
+    Type: String
+    Description: VpcId
+  ConsulEndpoint:
+    Type: String
+    Description: ConsulEndpoint
+  ConsulPort:
+    Type: String
+    Description: ConsulPort
+
+Conditions:
+  IsProd: !Equals [!Ref Env, "production"]
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: All open egress traffic
+      SecurityGroupEgress:
+      - CidrIp: 0.0.0.0/0
+        IpProtocol: "-1"
+      VpcId: !Ref VpcId
+
+  ConsulKVBackupFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join [ "/", ["", "aws", "lambda", !Join [ "-", [ "ConsulKVBackupLambda", !Ref Env] ] ] ]
+      RetentionInDays: 1
+
+  ConsulKVBackupFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", ["consul-kv-backup-lambda", !Ref Env] ]
+      ManagedPolicyArns: [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+      ]
+      AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":[{"Action":["sts:AssumeRole"],"Effect":"Allow","Principal":{"Service":["lambda.amazonaws.com"]}}]}'
+
+  ConsulKVBackupFunction:
+    Type: AWS::Serverless::Function
+    DependsOn: ConsulKVBackupFunctionLogGroup
+    Properties:
+      CodeUri: src/
+      Handler: app.lambdaHandler
+      Runtime: nodejs10.x
+      Role: !GetAtt ConsulKVBackupFunctionRole.Arn
+      AutoPublishAlias: live
+      FunctionName: !Join [ "-", [ "ConsulKVBackupLambda", !Ref Env] ]
+      VpcConfig:
+        SubnetIds:
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
+        SecurityGroupIds:
+          - !GetAtt SecurityGroup.GroupId
+      Environment:
+        Variables:
+          NODE_ENV: !Ref Env
+          ENDPOINT: !Ref ConsulEndpoint
+          PORT: !Ref ConsulPort
+          DEBUG: "consul-kv-backup-lambda"
+          DEBUG_HIDE_DATE: 1
+          DEBUG_COLORS: 1
+      Events:
+        Timer:
+          Type: Schedule
+          Properties:
+            Schedule: !If [IsProd, "cron(*/5 * ? * * *)", "cron(*/5 10-18 ? * MON-FRI *)"]
+
+Outputs:
+  ConsulKVBackupFunction:
+    Description: "Consul KV Store Backup Lambda Function ARN"
+    Value: !GetAtt ConsulKVBackupFunction.Arn
+  ConsulKVBackupFunctionIamRole:
+    Description: "Implicit IAM Role created for Consul KV Store backup function"
+    Value: !GetAtt ConsulKVBackupFunctionRole.Arn
