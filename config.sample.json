@@ -1,0 +1,9 @@
+{
+  "region": "eu-west-1",
+  "deployment_bucket": "holyart-deployments",
+  "vpc_name": "holy-${env}",
+  "subnet1_name": "Holy-Private-Subnet-1-${env}",
+  "subnet2_name": "Holy-Private-Subnet-2-${env}",
+  "consul_endpoint": "http://consul-internal.holyart.io",
+  "consul_port": "8500"
+}

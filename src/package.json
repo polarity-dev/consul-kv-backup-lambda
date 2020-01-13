@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "consul-kv-backup-lambda",
+  "version": "0.1.0",
+  "description": "consul-kv-backup-lambda",
+  "main": "app.js",
+  "author": "Nicolò Fuccella",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "node-fetch": "^2.6.0"
+  }
+}

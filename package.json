@@ -1,0 +1,18 @@
+{
+  "name": "consul-kv-backup-lambda-dev",
+  "version": "0.1.0",
+  "description": "Lambda for consul KV store backup",
+  "repository": "git@github.com:soluzionifutura/consul-kv-backup-lambda.git",
+  "author": "Nicolò Fuccella",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "./npm_scripts/deploy.sh",
+    "test": "./npm_scripts/test.sh",
+    "logs": "./npm_scripts/logs.sh",
+    "destroy": "./npm_scripts/destroy.sh"
+  },
+  "devDependencies": {
+    "@soluzioni-futura/eslint-config-soluzioni-futura": "^1.1.0",
+    "eslint": "^6.6.0"
+  }
+}
