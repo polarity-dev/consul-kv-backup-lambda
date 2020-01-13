@@ -7,8 +7,9 @@ deployment_bucket=$(jq -r ".deployment_bucket" ./config.json)
 vpc_name=$(eval "echo \"$(jq -r ".vpc_name" ./config.json)\"" 2> /dev/null)
 subnet1_name=$(eval "echo \"$(jq -r ".subnet1_name" ./config.json)\"" 2> /dev/null)
 subnet2_name=$(eval "echo \"$(jq -r ".subnet2_name" ./config.json)\"" 2> /dev/null)
-consul_endpoint=$(eval "echo \"$(jq -r ".consul_endpoint" ./config.json)\"" 2> /dev/null)
+consul_host=$(eval "echo \"$(jq -r ".consul_host" ./config.json)\"" 2> /dev/null)
 consul_port=$(eval "echo \"$(jq -r ".consul_port" ./config.json)\"" 2> /dev/null)
+s3_bucket=$(eval "echo \"$(jq -r ".s3_bucket" ./config.json)\"" 2> /dev/null)
 
 sam build --region $region
 
@@ -24,7 +25,7 @@ subnet2=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=[\"$subnet2_n
 
 sam deploy \
     --template-file ${env}-packaged.yaml \
-    --parameter-overrides="Env=$env PrivateSubnet1=$subnet1 PrivateSubnet2=$subnet2 VpcId=$vpc_id ConsulEndpoint=$consul_endpoint ConsulPort=$consul_port" \
+    --parameter-overrides="Env=$env PrivateSubnet1=$subnet1 PrivateSubnet2=$subnet2 VpcId=$vpc_id ConsulHost=$consul_host ConsulPort=$consul_port S3Bucket=$s3_bucket" \
     --stack-name ${name}-${env} \
     --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --region $region
