@@ -25,12 +25,15 @@ Parameters:
   VpcId:
     Type: String
     Description: VpcId
-  ConsulEndpoint:
+  ConsulHost:
     Type: String
-    Description: ConsulEndpoint
+    Description: ConsulHost
   ConsulPort:
     Type: String
     Description: ConsulPort
+  S3Bucket:
+    Type: String
+    Description: S3Bucket
 
 Conditions:
   IsProd: !Equals [!Ref Env, "production"]
@@ -59,6 +62,15 @@ Resources:
         "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
       ]
       AssumeRolePolicyDocument: '{"Version":"2012-10-17","Statement":[{"Action":["sts:AssumeRole"],"Effect":"Allow","Principal":{"Service":["lambda.amazonaws.com"]}}]}'
+      Policies:
+      - PolicyName: "s3-access"
+        PolicyDocument:
+          Statement:
+          - Sid: S3Access
+            Effect: Allow
+            Action:
+            - s3:PutObject
+            Resource: 'arn:aws:s3:::holy-consul-backup/*'
 
   ConsulKVBackupFunction:
     Type: AWS::Serverless::Function
@@ -79,8 +91,9 @@ Resources:
       Environment:
         Variables:
           NODE_ENV: !Ref Env
-          ENDPOINT: !Ref ConsulEndpoint
-          PORT: !Ref ConsulPort
+          CONSUL_HOST: !Ref ConsulHost
+          CONSUL_PORT: !Ref ConsulPort
+          S3_BUCKET: !Ref S3Bucket
           DEBUG: "consul-kv-backup-lambda"
           DEBUG_HIDE_DATE: 1
           DEBUG_COLORS: 1

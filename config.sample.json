@@ -4,6 +4,7 @@
   "vpc_name": "vpc-${env}",
   "subnet1_name": "My-Subnet-1-${env}",
   "subnet2_name": "My-Subnet-2-${env}",
-  "consul_endpoint": "http://consul.example.com",
-  "consul_port": "8500"
+  "consul_host": "http://consul.example.com",
+  "consul_port": "8500",
+  "s3_bucket": "<consul-backup-bucket>"
 }

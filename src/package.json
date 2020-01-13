@@ -7,6 +7,7 @@
   "author": "Nicolò Fuccella",
   "license": "MIT",
   "dependencies": {
+    "consul": "^0.37.0",
     "debug": "^4.1.1",
     "node-fetch": "^2.6.0"
   }
