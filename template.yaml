@@ -101,7 +101,8 @@ Resources:
         Timer:
           Type: Schedule
           Properties:
-            Schedule: !If [IsProd, "cron(*/5 * ? * * *)", "cron(*/5 10-18 ? * MON-FRI *)"]
+#            Schedule: !If [IsProd, "cron(*/5 * ? * * *)", "cron(*/5 10-18 ? * MON-FRI *)"]
+            Schedule: "cron(*/5 * ? * * *)"
 
 Outputs:
   ConsulKVBackupFunction:
