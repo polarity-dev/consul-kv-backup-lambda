@@ -15,9 +15,12 @@ exports.lambdaHandler = async () => {
   const keys = await consul.kv.keys("")
   debug("keys:", keys)
   const state = await Promise.all(keys.map(async key => {
-    const { Value } = await consul.kv.get(key)
+    let { Value } = await consul.kv.get(key)
     if (Value) {
-      const value = Buffer.from(JSON.stringify(JSON.parse(Value) || Value, null, 2))
+      try {
+        Value = JSON.parse(Value)
+      } catch (_) {}
+      const value = Buffer.from(JSON.stringify(Value, null, 2))
       return {
         key,
         flags: 0,
@@ -30,7 +33,6 @@ exports.lambdaHandler = async () => {
         flags: 0,
         value: Value
       }
- 
     }
   }))
   debug("state", state)
